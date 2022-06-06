@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import CreateProduct from "../components/CreateProduct";
 import Product from "../components/Product";
-import { PublicKey } from '@solana/web3.js';
+import HeadComponent from '../components/Head';
+
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 
@@ -12,6 +14,9 @@ const App = () => {
   // This will fetch the users' public key (wallet address) from any wallet we support
   const { publicKey } = useWallet();
   const [products, setProducts] = useState([]);
+
+  const isOwner = ( publicKey ? publicKey.toString() === process.env.NEXT_PUBLIC_OWNER_PUBLIC_KEY : false );
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => {
     if (publicKey) {
@@ -25,8 +30,12 @@ const App = () => {
   }, [publicKey]);
 
   const renderNotConnectedContainer = () => (
-    <div className="button-container">
-      <WalletMultiButton className="cta-button connect-wallet-button" />
+    <div>
+      <img src="https://media.giphy.com/media/eSwGh3YK54JKU/giphy.gif" alt="emoji" />
+
+      <div className="button-container">
+        <WalletMultiButton className="cta-button connect-wallet-button" />
+      </div>    
     </div>
   );
   
@@ -45,9 +54,16 @@ const App = () => {
         <header className="header-container">
           <p className="header">  Music Store 😈</p>
           <p className="sub-text">The only music store that accepts shitcoins</p>
+
+          {isOwner && (
+            <button className="create-product-button" onClick={() => setCreating(!creating)}>
+              {creating ? "Close" : "Create Product"}
+            </button>
+          )}
         </header>
 
         <main>
+          {creating && <CreateProduct />}
           {/* We only render the connect button if public key doesn't exist */}
           {publicKey ? renderItemBuyContainer() : renderNotConnectedContainer()}
 
